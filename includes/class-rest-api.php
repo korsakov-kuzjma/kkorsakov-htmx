@@ -25,6 +25,7 @@ class Rest_Api {
 
 	protected function init(): void {
 		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
+		add_filter( 'rest_pre_serve_request', [ $this, 'maybe_send_html_response' ], 10, 4 );
 	}
 
 	public function register_routes(): void {
@@ -38,6 +39,28 @@ class Rest_Api {
 				'args'                => $this->get_endpoint_args(),
 			]
 		);
+	}
+
+	public function maybe_send_html_response( $served, $result, $request, $server ) {
+		if ( ! Security::get_instance()->is_htmx_request() ) {
+			return $served;
+		}
+
+		$route = $request->get_route();
+		if ( strpos( $route, 'kkorsakov-htmx/v1/fragment' ) === false ) {
+			return $served;
+		}
+
+		$data = $result->get_data();
+
+		if ( is_string( $data ) && ! is_wp_error( $data ) ) {
+			header( 'Content-Type: text/html; charset=' . get_bloginfo( 'charset' ) );
+			header( 'HX-Trigger: afterFragmentLoad' );
+			echo $data;
+			return true;
+		}
+
+		return $served;
 	}
 
 	protected function get_endpoint_args(): array {
@@ -303,15 +326,6 @@ class Rest_Api {
 	}
 
 	protected function send_htmx_response( string $html ): WP_REST_Response {
-		$response = new WP_REST_Response( $html, 200 );
-
-		$response->set_headers(
-			[
-				'Content-Type' => 'text/html; charset=' . get_bloginfo( 'charset' ),
-				'HX-Trigger'   => 'afterFragmentLoad',
-			]
-		);
-
-		return $response;
+		return new WP_REST_Response( $html, 200 );
 	}
 }
