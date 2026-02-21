@@ -1,0 +1,85 @@
+/**
+ * Frontend styles for kkorsakov-htmx plugin.
+ *
+ * @package Kkorsakov\Htmx
+ * @since 1.0.0
+ */
+
+.htmx-indicator {
+	opacity: 0;
+	transition: opacity 200ms ease-in;
+}
+
+.htmx-request .htmx-indicator,
+.htmx-request.htmx-indicator {
+	opacity: 1;
+}
+
+.htmx-indicator-svg {
+	display: inline-block;
+	width: 20px;
+	height: 20px;
+}
+
+.htmx-indicator-spinner {
+	display: inline-block;
+	width: 20px;
+	height: 20px;
+	border: 2px solid #f3f3f3;
+	border-top: 2px solid #3498db;
+	border-radius: 50%;
+	animation: htmx-spin 1s linear infinite;
+}
+
+@keyframes htmx-spin {
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+}
+
+.htmx-loading-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(255, 255, 255, 0.7);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000;
+	opacity: 0;
+	transition: opacity 200ms ease-in;
+}
+
+.htmx-request .htmx-loading-overlay {
+	opacity: 1;
+}
+
+.htmx-error {
+	padding: 1rem;
+	background: #fff;
+	border-left: 4px solid #dc3545;
+	color: #721c24;
+	margin: 1rem 0;
+}
+
+.htmx-success {
+	padding: 1rem;
+	background: #d4edda;
+	border-left: 4px solid #28a745;
+	color: #155724;
+	margin: 1rem 0;
+}
+
+.htmx-swapping {
+	opacity: 0;
+	transition: opacity 200ms ease-out;
+}
+
+.htmx-settling {
+	transition: all 200ms ease-in;
+}
+
+[kkorsakov-htmx-fragment] {
+	position: relative;
+}
