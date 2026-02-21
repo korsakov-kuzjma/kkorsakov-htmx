@@ -61,7 +61,8 @@ spl_autoload_register(
 		}
 
 		if ( strpos( $relative_class, 'Traits\\' ) === 0 ) {
-			$trait_file = $base_dir . 'traits/' . str_replace( 'Traits/', '', $relative_class ) . '.php';
+			$trait_name = str_replace( 'Traits/', '', $relative_class );
+			$trait_file = $base_dir . 'traits/trait-' . strtolower( $trait_name ) . '.php';
 
 			if ( file_exists( $trait_file ) ) {
 				require $trait_file;
