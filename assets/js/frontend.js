@@ -22,15 +22,19 @@
 	});
 
 	document.body.addEventListener('htmx:beforeRequest', function(event) {
-		var target = event.detail.pathInfo.requestPath;
 		if (typeof kkorsakovHtmxSettings !== 'undefined' && kkorsakovHtmxSettings.endpoint) {
-			if (target.indexOf('kkorsakov-htmx/v1/fragment') !== -1 && !event.detail.parameters.target) {
-				var url = new URL(event.detail.pathInfo.finalRequestPath, window.location.origin);
-				if (!url.searchParams.has('target') && event.detail.target) {
-					var selector = event.detail.target.getAttribute('hx-target') || '';
-					if (selector) {
-						url.searchParams.set('target', selector);
-						event.detail.pathInfo.finalRequestPath = url.pathname + url.search;
+			var target = event.detail.pathInfo ? event.detail.pathInfo.requestPath : '';
+			var params = event.detail.parameters || {};
+			if (target.indexOf('kkorsakov-htmx/v1/fragment') !== -1 && !params.target) {
+				var requestPath = event.detail.pathInfo ? event.detail.pathInfo.finalRequestPath : '';
+				if (requestPath) {
+					var url = new URL(requestPath, window.location.origin);
+					if (!url.searchParams.has('target') && event.detail.target) {
+						var selector = event.detail.target.getAttribute('hx-target') || '';
+						if (selector) {
+							url.searchParams.set('target', selector);
+							event.detail.pathInfo.finalRequestPath = url.pathname + url.search;
+						}
 					}
 				}
 			}

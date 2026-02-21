@@ -96,6 +96,7 @@ class Htmx_Integrator {
 		$atts = shortcode_atts(
 			[
 				'target'    => '',
+				'fragment'  => '',
 				'trigger'   => 'click',
 				'swap'      => 'innerHTML',
 				'url'       => '',
@@ -106,7 +107,8 @@ class Htmx_Integrator {
 			'htmx'
 		);
 
-		$url = $this->get_fragment_url( $atts['url'], $atts['target'] );
+		$fragment_id = ! empty( $atts['fragment'] ) ? $atts['fragment'] : $atts['target'];
+		$url = $this->get_fragment_url( $atts['url'], $fragment_id );
 
 		$htmx_attrs = [
 			'hx-' . sanitize_key( $atts['method'] ) => esc_url( $url ),

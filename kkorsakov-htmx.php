@@ -52,7 +52,7 @@ spl_autoload_register(
 			return;
 		}
 
-		$lowercase_relative_class = strtolower( str_replace( '\\', '-', $relative_class ) );
+		$lowercase_relative_class = strtolower( str_replace( [ '\\', '_' ], '-', $relative_class ) );
 		$file = $base_dir . 'class-' . $lowercase_relative_class . '.php';
 
 		if ( file_exists( $file ) ) {
@@ -61,7 +61,7 @@ spl_autoload_register(
 		}
 
 		if ( strpos( $relative_class, 'Traits\\' ) === 0 ) {
-			$trait_name = str_replace( 'Traits/', '', $relative_class );
+			$trait_name = str_replace( 'Traits\\', '', $relative_class );
 			$trait_file = $base_dir . 'traits/trait-' . strtolower( $trait_name ) . '.php';
 
 			if ( file_exists( $trait_file ) ) {
