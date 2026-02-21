@@ -52,6 +52,14 @@ spl_autoload_register(
 			return;
 		}
 
+		$lowercase_relative_class = strtolower( str_replace( '\\', '-', $relative_class ) );
+		$file = $base_dir . 'class-' . $lowercase_relative_class . '.php';
+
+		if ( file_exists( $file ) ) {
+			require $file;
+			return;
+		}
+
 		if ( strpos( $relative_class, 'Traits\\' ) === 0 ) {
 			$trait_file = $base_dir . 'traits/' . str_replace( 'Traits/', '', $relative_class ) . '.php';
 
