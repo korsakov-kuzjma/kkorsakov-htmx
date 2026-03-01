@@ -23,12 +23,15 @@ The WordPress plugin `kkorsakov-htmx` is designed for seamless integration of th
 ```text
 kkorsakov-htmx/
 ├── kkorsakov-htmx.php              # Main plugin file (bootstrap)
-├── README.md                       # Public documentation
+├── README.md                       # Public documentation (for users)
+├── DEVELOPER.md                   # Developer guide (English)
+├── DEVELOPER.ru.md                # Developer guide (Russian)
 ├── AGENTS.md                       # Instructions for AI agents and developers (English)
 ├── AGENTS.ru.md                    # Instructions for AI agents and developers (Russian)
 ├── CHANGELOG.md                    # Changelog (Keep a Changelog format)
 ├── includes/
-│   ├── class-htmx-integrator.php   # HTMX integration: enqueue, attributes, hooks
+│   ├── class-plugin.php           # Main plugin class (initialization, hooks)
+│   ├── class-htmx-integrator.php   # HTMX integration: shortcode, attributes, detection
 │   ├── class-rest-api.php          # REST API endpoints registration and handling
 │   ├── class-assets.php            # JS/CSS assets management
 │   ├── class-security.php          # Utilities: nonce, sanitization, capabilities
@@ -113,12 +116,18 @@ namespace Kkorsakov\Htmx;
         'type' => 'string',
         'required' => true,
         'sanitize_callback' => 'sanitize_text_field',
-        'description' => 'Target fragment identifier'
+        'description' => 'Target fragment identifier (ID, CSS selector, or slug)'
     ],
     'context' => [
         'type' => 'string',
         'default' => 'view',
         'enum' => ['view', 'edit'],
+    ],
+    'args' => [
+        'type' => 'object',
+        'default' => [],
+        'sanitize_callback' => 'sanitize_args',
+        'description' => 'Additional arguments for fragment rendering'
     ]
 ]
 ```
@@ -187,8 +196,23 @@ services:
 // Modify HTMX configuration
 apply_filters( 'kkorsakov_htmx_config', array $config ): array
 
+// Force enqueue HTMX on all pages
+apply_filters( 'kkorsakov_htmx_force_enqueue', bool $force ): bool
+
+// Use CDN instead of local file
+apply_filters( 'kkorsakov_htmx_use_cdn', bool $use_cdn ): bool
+
+// Modify fragment URL before request
+apply_filters( 'kkorsakov_htmx_fragment_url', string $url, string $target ): string
+
 // Modify HTML fragment before sending
-apply_filters( 'kkorsakov_htmx_fragment_output', string $html, string $target ): string
+apply_filters( 'kkorsakov_htmx_fragment_output', string $html, string $target, string $context ): string
+
+// Handle custom fragment types (CSS selectors like #my-div)
+apply_filters( 'kkorsakov_htmx_custom_fragment', string $html, string $target, string $context, array $args ): string
+
+// Handle custom fragment by name (non-CSS-selector)
+apply_filters( 'kkorsakov_htmx_render_fragment', string $html, string $target, string $context, array $args ): string
 
 // Check REST API access permissions
 apply_filters( 'kkorsakov_htmx_rest_permissions', bool $allowed, WP_REST_Request $request ): bool

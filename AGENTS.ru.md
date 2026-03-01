@@ -23,15 +23,18 @@
 ```text
 kkorsakov-htmx/
 ├── kkorsakov-htmx.php              # Главный файл плагина (bootstrap)
-├── README.md                       # Публичная документация
-├── AGENTS.md                       # Instructions for AI agents and developers (English)
+├── README.md                       # Публичная документация (для пользователей)
+├── DEVELOPER.md                    # Руководство разработчика (на английском)
+├── DEVELOPER.ru.md                # Руководство разработчика (на русском)
+├── AGENTS.md                       # Инструкции для AI-агентов и разработчиков (на английском)
 ├── AGENTS.ru.md                    # Инструкции для AI-агентов и разработчиков (на русском)
 ├── CHANGELOG.md                    # История изменений (Keep a Changelog)
 ├── includes/
-│   ├── class-htmx-integrator.php   # Интеграция HTMX: enqueue, атрибуты, хуки
+│   ├── class-plugin.php           # Главный класс плагина (инициализация, хуки)
+│   ├── class-htmx-integrator.php   # Интеграция HTMX: шорткод, атрибуты, обнаружение
 │   ├── class-rest-api.php          # Регистрация и обработка REST API endpoints
-│   ├── class-assets.php            # Управление загрузкой JS/CSS ассетов
-│   ├── class-security.php          # Утилиты: nonce, sanitization, capabilities
+│   ├── class-assets.php            # Управление JS/CSS активами
+│   ├── class-security.php          # Утилиты: nonce, санитизация, capabilities
 │   └── traits/
 │       └── trait-singleton.php     # Паттерн Singleton для классов плагина
 ├── assets/
@@ -113,12 +116,18 @@ namespace Kkorsakov\Htmx;
         'type' => 'string',
         'required' => true,
         'sanitize_callback' => 'sanitize_text_field',
-        'description' => 'Идентификатор целевого фрагмента'
+        'description' => 'Идентификатор целевого фрагмента (ID, CSS селектор или slug)'
     ],
     'context' => [
         'type' => 'string',
         'default' => 'view',
         'enum' => ['view', 'edit'],
+    ],
+    'args' => [
+        'type' => 'object',
+        'default' => [],
+        'sanitize_callback' => 'sanitize_args',
+        'description' => 'Дополнительные аргументы для рендеринга фрагмента'
     ]
 ]
 ```
@@ -187,8 +196,23 @@ services:
 // Изменение конфигурации HTMX
 apply_filters( 'kkorsakov_htmx_config', array $config ): array
 
+// Принудительная загрузка HTMX на всех страницах
+apply_filters( 'kkorsakov_htmx_force_enqueue', bool $force ): bool
+
+// Использовать CDN вместо локального файла
+apply_filters( 'kkorsakov_htmx_use_cdn', bool $use_cdn ): bool
+
+// Изменить URL фрагмента перед запросом
+apply_filters( 'kkorsakov_htmx_fragment_url', string $url, string $target ): string
+
 // Модификация HTML-фрагмента перед отправкой
-apply_filters( 'kkorsakov_htmx_fragment_output', string $html, string $target ): string
+apply_filters( 'kkorsakov_htmx_fragment_output', string $html, string $target, string $context ): string
+
+// Обработка кастомных типов фрагментов (CSS селекторы типа #my-div)
+apply_filters( 'kkorsakov_htmx_custom_fragment', string $html, string $target, string $context, array $args ): string
+
+// Обработка кастомного фрагмента по имени (не CSS-селектор)
+apply_filters( 'kkorsakov_htmx_render_fragment', string $html, string $target, string $context, array $args ): string
 
 // Проверка прав доступа к REST API
 apply_filters( 'kkorsakov_htmx_rest_permissions', bool $allowed, WP_REST_Request $request ): bool

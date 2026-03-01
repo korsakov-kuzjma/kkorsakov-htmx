@@ -196,8 +196,12 @@ class Htmx_Integrator {
 	 *
 	 * Пример использования:
 	 *   [htmx target="#content" fragment="sidebar" trigger="click"]
+	 *   [htmx tag="div" target="#content" fragment="my-content"]
+	 *   [htmx tag="img" target="#preview" fragment="123"]
 	 *
 	 * Параметры шорткода:
+	 * - tag       (string) - HTML тег (span, div, a, img, button и т.д.) - по умолчанию: span
+	 * - class     (string) - CSS классы для элемента
 	 * - target    (string) - CSS-селектор целевого элемента (обязательно)
 	 * - fragment  (string) - ID фрагмента для загрузки
 	 * - trigger   (string) - событие триггера (click, submit, etc)
@@ -217,6 +221,8 @@ class Htmx_Integrator {
 
 		$atts = shortcode_atts(
 			[
+				'tag'       => 'span',
+				'class'     => '',
 				'target'    => '',
 				'fragment'  => '',
 				'trigger'   => 'click',
@@ -228,6 +234,9 @@ class Htmx_Integrator {
 			$atts,
 			'htmx'
 		);
+
+		$allowed_tags = [ 'span', 'div', 'a', 'button', 'img', 'input', 'form', 'ul', 'li', 'section', 'article', 'header', 'footer', 'main', 'aside', 'nav' ];
+		$tag = in_array( $atts['tag'], $allowed_tags, true ) ? $atts['tag'] : 'span';
 
 		$fragment_id = ! empty( $atts['fragment'] ) ? $atts['fragment'] : $atts['target'];
 		$url = $this->get_fragment_url( $atts['url'], $fragment_id );
@@ -243,13 +252,35 @@ class Htmx_Integrator {
 			$htmx_attrs['hx-indicator'] = esc_attr( $atts['indicator'] );
 		}
 
+		if ( ! empty( $atts['class'] ) ) {
+			$htmx_attrs['class'] = esc_attr( $atts['class'] );
+		}
+
 		$attributes = Security::get_instance()->escape_html_attributes( $htmx_attrs );
 
-		$output = sprintf(
-			'<span %s>%s</span>',
-			$attributes,
-			do_shortcode( $content ?? '' )
-		);
+		$inner_content = do_shortcode( $content ?? '' );
+
+		if ( 'img' === $tag ) {
+			$output = sprintf(
+				'<img %s alt="%s">',
+				$attributes,
+				esc_attr( strip_tags( $inner_content ) )
+			);
+		} elseif ( 'a' === $tag ) {
+			$output = sprintf(
+				'<a %s>%s</a>',
+				$attributes,
+				$inner_content
+			);
+		} else {
+			$output = sprintf(
+				'<%s %s>%s</%s>',
+				$tag,
+				$attributes,
+				$inner_content,
+				$tag
+			);
+		}
 
 		return $output;
 	}

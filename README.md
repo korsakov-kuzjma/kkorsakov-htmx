@@ -98,20 +98,114 @@ git clone https://github.com/korsakov-kuzjma/kkorsakov-htmx.git kkorsakov-htmx
 
 | Параметр | Обязательный | Описание | По умолчанию |
 |----------|--------------|----------|--------------|
-| `target` | Нет | CSS selector целевого элемента | (пусто) |
+| `tag` | Нет | HTML тег элемента (span, div, a, button, img и т.д.) | `span` |
+| `class` | Нет | CSS классы для элемента | (пусто) |
+| `target` | Да | CSS selector целевого элемента, куда загрузить контент | (пусто) |
+| `fragment` | Нет | ID фрагмента для загрузки (пост, термин или кастомный) | значение `target` |
 | `trigger` | Нет | Событие, которое инициирует запрос | `click` |
 | `swap` | Нет | Способ замены контента | `innerHTML` |
 | `url` | Нет | Полный URL для запроса | Автогенерация |
 | `indicator` | Нет | CSS selector элемента-индикатора загрузки | `.htmx-indicator` |
 | `method` | Нет | HTTP метод запроса | `get` |
 
+### Доступные HTML теги
+
+Вы можете использовать любой из следующих тегов:
+`span`, `div`, `a`, `button`, `img`, `input`, `form`, `ul`, `li`, `section`, `article`, `header`, `footer`, `main`, `aside`, `nav`
+
 ### Примеры шорткода
 
-#### Простой линк
+#### Простой линк (по умолчанию создаётся span)
 
 ```php
 [htmx target="#content" trigger="click"]Нажмите для загрузки[/htmx]
 <div id="content"></div>
+```
+
+#### Использование div вместо span
+
+```php
+[htmx tag="div" target="#sidebar" fragment="popular-posts" class="widget"]
+  <h3>Популярные посты</h3>
+  <p>Нажмите для загрузки</p>
+[/htmx]
+
+<div id="sidebar"></div>
+```
+
+#### Ссылка с HTMX
+
+```php
+[htmx tag="a" target="#main-content" fragment="about" class="btn btn-primary" href="/about"]
+  О нас
+[/htmx]
+```
+
+**Результат:**
+```html
+<a hx-get=".../fragment?target=about" 
+   hx-trigger="click" 
+   hx-target="#main-content"
+   hx-swap="innerHTML"
+   class="btn btn-primary" 
+   href="/about">
+  О нас
+</a>
+```
+
+#### Кнопка с HTMX
+
+```php
+[htmx tag="button" target="#results" fragment="search" method="post" class="btn btn-load"]
+  Загрузить результаты
+[/htmx]
+
+<div id="results"></div>
+```
+
+#### Изображение с кликом для загрузки
+
+```php
+[htmx tag="img" target="#modal" fragment="123" class="clickable"
+  src="/wp-content/uploads/placeholder.jpg" 
+  alt="Нажмите для просмотра">
+```
+
+**Результат:**
+```html
+<img hx-get=".../fragment?target=123" 
+     hx-trigger="click" 
+     hx-target="#modal"
+     hx-swap="innerHTML"
+     class="clickable"
+     src="/wp-content/uploads/placeholder.jpg" 
+     alt="Нажмите для просмотра">
+```
+
+#### Форма с AJAX отправкой
+
+```php
+[htmx tag="form" target="#form-response" fragment="contact-form" method="post" class="ajax-form"]
+  <input type="email" name="email" placeholder="Ваш email" required>
+  <button type="submit">Отправить</button>
+[/htmx]
+
+<div id="form-response"></div>
+```
+
+#### С индикатором загрузки
+
+```php
+[htmx target="#posts" trigger="click" indicator=".loader" class="btn"]
+  Загрузить посты
+[/htmx]
+<span class="htmx-indicator" style="display:none;">⏳ Загрузка...</span>
+<div id="posts"></div>
+
+<style>
+.htmx-request .htmx-indicator { display: inline; }
+.htmx-request.btn { opacity: 0.5; }
+</style>
 ```
 
 #### Ручное указание URL
@@ -123,20 +217,10 @@ git clone https://github.com/korsakov-kuzjma/kkorsakov-htmx.git kkorsakov-htmx
 <div id="widget"></div>
 ```
 
-#### С индикатором загрузки
+#### С POST запросом
 
 ```php
-[htmx target="#posts" trigger="click" indicator=".loader"]
-  Загрузить посты
-[/htmx]
-<div class="loader" style="display:none;">⏳ Загрузка...</div>
-<div id="posts"></div>
-```
-
-#### С POST запросом и обновлением атрибутов
-
-```php
-[htmx method="post" target="#status" trigger="click"]
+[htmx method="post" target="#status" fragment="mark-read" class="btn-mark"]
   Отметить как прочитанное
 [/htmx]
 <span id="status">Новые</span>
