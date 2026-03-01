@@ -1,6 +1,13 @@
 <?php
 /**
- * HTMX integrator class.
+ * Класс Htmx_Integrator (Интегратор HTMX).
+ *
+ * Основной класс интеграции библиотеки HTMX в WordPress:
+ * - Автоматическое обнаружение использования HTMX
+ * - Подключение JS/CSS только при необходимости
+ * - Шорткод [htmx] для создания HTMX-элементов
+ * - Поддержка Gutenberg-блока kkorsakov/htmx-fragment
+ * - Вывод конфигурации HTMX в meta-теге
  *
  * @package Kkorsakov\Htmx
  * @since 1.0.0
@@ -16,12 +23,47 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Класс Htmx_Integrator.
+ *
+ * Обеспечивает интеграцию HTMX с WordPress.
+ * Автоматически определяет, когда нужно загружать HTMX,
+ * на основе использования шорткода или блока Gutenberg.
+ *
+ * @since 1.0.0
+ */
 class Htmx_Integrator {
 
+	/**
+	 * Подключение трейта Singleton.
+	 *
+	 * @since 1.0.0
+	 */
 	use Singleton;
 
+	/**
+	 * Флаг необходимости загрузки HTMX.
+	 *
+	 * Устанавливается в true, если на странице обнаружено
+	 * использование HTMX (шорткод или блок).
+	 *
+	 * @since 1.0.0
+	 * @var bool
+	 */
 	private bool $should_enqueue = false;
 
+	/**
+	 * Инициализация интегратора.
+	 *
+	 * Регистрирует все необходимые хуки WordPress:
+	 * - wp_enqueue_scripts: подключение скриптов
+	 * - wp_head: вывод конфигурации
+	 * - Шорткод [htmx]
+	 * - render_block: определение блока
+	 * - template_redirect: анализ контента
+	 *
+	 * @since 1.0.0
+	 */
 	protected function init(): void {
 		add_action( 'wp_enqueue_scripts', [ $this, 'maybe_enqueue_htmx' ] );
 		add_action( 'wp_head', [ $this, 'output_htmx_config' ], 1 );
@@ -30,6 +72,18 @@ class Htmx_Integrator {
 		add_action( 'template_redirect', [ $this, 'detect_htmx_usage' ] );
 	}
 
+	/**
+	 * Определить использование HTMX на странице.
+	 *
+	 * Анализирует контент текущего поста на наличие:
+	 * - Шорткода [htmx]
+	 * - Блока Gutenberg kkorsakov/htmx-fragment
+	 *
+	 * Вызывается на хуке template_redirect для оптимизации
+	 * - активы загружаются только при необходимости.
+	 *
+	 * @since 1.0.0
+	 */
 	public function detect_htmx_usage(): void {
 		if ( $this->should_enqueue ) {
 			return;
@@ -50,6 +104,17 @@ class Htmx_Integrator {
 		}
 	}
 
+	/**
+	 * Проверить наличие HTMX блока в массиве блоков.
+	 *
+	 * Рекурсивно проверяет все блоки и вложенные блоки
+	 * на наличие блока kkorsakov/htmx-fragment.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $blocks Массив блоков Gutenberg.
+	 * @return bool True если найден HTMX блок.
+	 */
 	protected function has_htmx_block( array $blocks ): bool {
 		foreach ( $blocks as $block ) {
 			if ( 'kkorsakov/htmx-fragment' === $block['blockName'] ) {
@@ -64,6 +129,18 @@ class Htmx_Integrator {
 		return false;
 	}
 
+	/**
+	 * Обработчик рендеринга блока Gutenberg.
+	 *
+	 * Срабатывает при рендеринге блока kkorsakov/htmx-fragment.
+	 * Устанавливает флаг should_enqueue для загрузки активов.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $block_content HTML-содержимое блока.
+	 * @param array  $block          Массив данных блока.
+	 * @return string Неизмененное содержимое блока.
+	 */
 	public function check_block_for_htmx( string $block_content, array $block ): string {
 		if ( 'kkorsakov/htmx-fragment' === $block['blockName'] ) {
 			$this->should_enqueue = true;
@@ -72,6 +149,17 @@ class Htmx_Integrator {
 		return $block_content;
 	}
 
+	/**
+	 * Подключить активы HTMX при необходимости.
+	 *
+	 * Проверяет флаг should_enqueue и фильтр kkorsakov_htmx_force_enqueue,
+	 * затем подключает JS и CSS файлы.
+	 *
+	 * Фильтры:
+	 * - kkorsakov_htmx_force_enqueue (bool) - принудительная загрузка
+	 *
+	 * @since 1.0.0
+	 */
 	public function maybe_enqueue_htmx(): void {
 		$force_enqueue = apply_filters( 'kkorsakov_htmx_force_enqueue', false );
 
@@ -80,6 +168,17 @@ class Htmx_Integrator {
 		}
 	}
 
+	/**
+	 * Вывести конфигурацию HTMX.
+	 *
+	 * Добавляет мета-тег htmx-config в секцию <head>,
+	 * если HTMX используется на странице.
+	 *
+	 * Фильтры:
+	 * - kkorsakov_htmx_force_enqueue (bool) - принудительная загрузка
+	 *
+	 * @since 1.0.0
+	 */
 	public function output_htmx_config(): void {
 		$force_enqueue = apply_filters( 'kkorsakov_htmx_force_enqueue', false );
 
@@ -90,6 +189,29 @@ class Htmx_Integrator {
 		Assets::get_instance()->add_htmx_config_meta();
 	}
 
+	/**
+	 * Обработчик шорткода [htmx].
+	 *
+	 * Создает HTML-элемент с атрибутами HTMX для AJAX-запросов.
+	 *
+	 * Пример использования:
+	 *   [htmx target="#content" fragment="sidebar" trigger="click"]
+	 *
+	 * Параметры шорткода:
+	 * - target    (string) - CSS-селектор целевого элемента (обязательно)
+	 * - fragment  (string) - ID фрагмента для загрузки
+	 * - trigger   (string) - событие триггера (click, submit, etc)
+	 * - swap      (string) - способ замены (innerHTML, outerHTML, etc)
+	 * - url       (string) - кастомный URL для запроса
+	 * - indicator (string) - CSS-селектор индикатора загрузки
+	 * - method    (string) - HTTP метод (get, post)
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array      $atts    Атрибуты шорткода.
+	 * @param string|null $content Содержимое внутри шорткода.
+	 * @return string HTML-элемент с HTMX атрибутами.
+	 */
 	public function render_shortcode( array $atts, ?string $content = null ): string {
 		$this->should_enqueue = true;
 
@@ -132,6 +254,22 @@ class Htmx_Integrator {
 		return $output;
 	}
 
+	/**
+	 * Получить URL для фрагмента.
+	 *
+	 * Формирует URL для REST API запроса фрагмента.
+	 * Если передан кастомный URL - использует его,
+	 * иначе формирует стандартный URL эндпоинта.
+	 *
+	 * Фильтры:
+	 * - kkorsakov_htmx_fragment_url (string) - изменить URL
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $custom_url Кастомный URL (если есть).
+	 * @param string $target     Идентификатор фрагмента.
+	 * @return string Обработанный URL.
+	 */
 	protected function get_fragment_url( string $custom_url, string $target ): string {
 		if ( ! empty( $custom_url ) ) {
 			return esc_url_raw( $custom_url );
@@ -147,6 +285,20 @@ class Htmx_Integrator {
 		return apply_filters( 'kkorsakov_htmx_fragment_url', $url, $target );
 	}
 
+	/**
+	 * Принудительно включить загрузку HTMX.
+	 *
+	 * Устанавливает флаг should_enqueue в true.
+	 * Полезно для тем или плагинов, которые программно
+	 * используют HTMX без шорткода или блока.
+	 *
+	 * Пример использования:
+	 *   add_action('wp', function() {
+	 *       Htmx_Integrator::get_instance()->force_enqueue();
+	 *   });
+	 *
+	 * @since 1.0.0
+	 */
 	public function force_enqueue(): void {
 		$this->should_enqueue = true;
 	}

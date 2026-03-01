@@ -1,6 +1,12 @@
 <?php
 /**
- * Assets management class.
+ * Класс Assets (Управление активами).
+ *
+ * Отвечает за регистрацию и подключение CSS и JS файлов плагина:
+ * - Библиотека HTMX (локальная копия или CDN)
+ * - JavaScript инициализации фронтенда
+ * - CSS стили для индикаторов загрузки
+ * - Конфигурация HTMX через мета-тег
  *
  * @package Kkorsakov\Htmx
  * @since 1.0.0
@@ -16,21 +22,63 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Класс Assets.
+ *
+ * Управляет регистрацией и подключением всех активов плагина.
+ * Использует WordPress API для регистрации скриптов и стилей.
+ *
+ * @since 1.0.0
+ */
 class Assets {
 
+	/**
+	 * Подключение трейта Singleton.
+	 *
+	 * @since 1.0.0
+	 */
 	use Singleton;
 
+	/**
+	 * Инициализация класса.
+	 *
+	 * Регистрирует хуки WordPress для регистрации активов.
+	 * Вызывается автоматически при создании экземпляра.
+	 *
+	 * @since 1.0.0
+	 */
 	protected function init(): void {
 		add_action( 'wp_enqueue_scripts', [ $this, 'register_assets' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'register_assets' ] );
 	}
 
+	/**
+	 * Зарегистрировать все активы.
+	 *
+	 * Регистрирует библиотеку HTMX, JS и CSS файлы.
+	 * Вызывается WordPress автоматически при загрузке страницы.
+	 *
+	 * @since 1.0.0
+	 */
 	public function register_assets(): void {
 		$this->register_htmx_library();
 		$this->register_frontend_script();
 		$this->register_frontend_style();
 	}
 
+	/**
+	 * Зарегистрировать библиотеку HTMX.
+	 *
+	 * Регистрирует скрипт библиотеки HTMX.
+	 * Поддерживает два режима загрузки:
+	 * - Локальный файл (по умолчанию)
+	 * - CDN (unpkg.com) - включается через фильтр 'kkorsakov_htmx_use_cdn'
+	 *
+	 * Фильтры:
+	 * - kkorsakov_htmx_use_cdn (bool) - использовать CDN
+	 *
+	 * @since 1.0.0
+	 */
 	protected function register_htmx_library(): void {
 		$use_cdn = apply_filters( 'kkorsakov_htmx_use_cdn', false );
 		$version = '2.0.2';
@@ -50,6 +98,22 @@ class Assets {
 		);
 	}
 
+	/**
+	 * Зарегистрировать фронтенд скрипт.
+	 *
+	 * Регистрирует основной JS файл плагина с зависимостью от HTMX.
+	 * Также добавляет локализованные данные для использования в JS:
+	 * - root: URL корня REST API
+	 * - nonce: WordPress REST nonce
+	 * - endpoint: URL эндпоинта фрагментов
+	 *
+	 * Доступ в JS:
+	 *   kkorsakovHtmxSettings.root
+	 *   kkorsakovHtmxSettings.nonce
+	 *   kkorsakovHtmxSettings.endpoint
+	 *
+	 * @since 1.0.0
+	 */
 	protected function register_frontend_script(): void {
 		wp_register_script(
 			'kkorsakov-htmx-js',
@@ -72,6 +136,14 @@ class Assets {
 		);
 	}
 
+	/**
+	 * Зарегистрировать фронтенд стили.
+	 *
+	 * Регистрирует CSS файл плагина для стилизации
+	 * индикаторов загрузки HTMX.
+	 *
+	 * @since 1.0.0
+	 */
 	protected function register_frontend_style(): void {
 		wp_register_style(
 			'kkorsakov-htmx-css',
@@ -81,11 +153,34 @@ class Assets {
 		);
 	}
 
+	/**
+	 * Подключить активы HTMX.
+	 *
+	 * Подключает JS и CSS файлы на страницу.
+	 * Вызывается автоматически при обнаружении использования HTMX.
+	 *
+	 * @since 1.0.0
+	 */
 	public function enqueue_htmx_assets(): void {
 		wp_enqueue_script( 'kkorsakov-htmx-js' );
 		wp_enqueue_style( 'kkorsakov-htmx-css' );
 	}
 
+	/**
+	 * Вывести конфигурацию HTMX в HEAD.
+	 *
+	 * Добавляет мета-тег с конфигурацией HTMX в секцию <head>.
+	 * По умолчанию включает:
+	 * - historyEnabled: включено历史 API
+	 * - defaultSwapStyle: innerHTML
+	 * - defaultSwapDelay: 0мс
+	 * - defaultSettleDelay: 20мс
+	 *
+	 * Фильтры:
+	 * - kkorsakov_htmx_config (array) - изменить конфигурацию
+	 *
+	 * @since 1.0.0
+	 */
 	public function add_htmx_config_meta(): void {
 		$config = [
 			'historyEnabled'    => true,
