@@ -1,11 +1,13 @@
 === kkorsakov-htmx ===
 Contributors: kkorsakov
-Tags: htmx, ajax, javascript, frontend, dynamic-content
+Tags: ajax, javascript, api, dynamic-content, lazy-loading
 Requires at least: 6.0
 Tested up to: 6.7
+Requires PHP: 7.4
 Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Donate link: https://github.com/korsakov-kuzjma/kkorsakov-htmx
 
 Бесшовная интеграция библиотеки HTMX в WordPress с расширенным REST API для фрагментных запросов.
 
