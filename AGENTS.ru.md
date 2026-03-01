@@ -35,6 +35,7 @@ kkorsakov-htmx/
 │   ├── class-rest-api.php          # Регистрация и обработка REST API endpoints
 │   ├── class-assets.php            # Управление JS/CSS активами
 │   ├── class-security.php          # Утилиты: nonce, санитизация, capabilities
+│   ├── class-admin-settings.php    # Страницы настроек и документации в админке
 │   └── traits/
 │       └── trait-singleton.php     # Паттерн Singleton для классов плагина
 ├── assets/

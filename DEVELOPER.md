@@ -40,8 +40,33 @@ Kkorsakov\Htmx\
 ├── Assets          - JS/CSS asset management
 ├── Htmx_Integrator - HTMX integration (shortcodes, blocks)
 ├── Rest_Api        - REST API endpoints
+├── Admin_Settings  - Admin settings and documentation pages
 └── Traits\
     └── Singleton   - Trait for Singleton pattern
+```
+
+### Admin Settings
+
+The plugin provides admin pages for settings and documentation:
+
+- **Settings page**: HTMX → Settings
+- **Documentation page**: HTMX → Documentation
+
+### Options Storage
+
+Settings are stored in WordPress options table:
+
+```php
+// Get options
+$options = get_option('kkorsakov_htmx_options', []);
+
+// Default values
+$defaults = [
+    'use_cdn'        => false,
+    'force_enqueue'  => false,
+    'history_enabled' => true,
+    'swap_style'      => 'innerHTML',
+];
 ```
 
 ### Main Constants

@@ -78,6 +78,7 @@ class Plugin {
 	 * - Assets: управление активами
 	 * - Htmx_Integrator: интеграция HTMX
 	 * - Rest_Api: REST API эндпоинты
+	 * - Admin_Settings: настройки и документация в админке
 	 *
 	 * @since 1.0.0
 	 */
@@ -86,6 +87,10 @@ class Plugin {
 		Assets::get_instance();
 		Htmx_Integrator::get_instance();
 		Rest_Api::get_instance();
+
+		if ( is_admin() ) {
+			Admin_Settings::get_instance();
+		}
 	}
 
 	/**

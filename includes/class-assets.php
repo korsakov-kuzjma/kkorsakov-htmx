@@ -50,6 +50,42 @@ class Assets {
 	protected function init(): void {
 		add_action( 'wp_enqueue_scripts', [ $this, 'register_assets' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'register_assets' ] );
+		add_filter( 'kkorsakov_htmx_use_cdn', [ $this, 'get_option_use_cdn' ] );
+		add_filter( 'kkorsakov_htmx_config', [ $this, 'get_option_config' ] );
+	}
+
+	/**
+	 * Получить опцию use_cdn.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool Значение опции.
+	 */
+	public function get_option_use_cdn(): bool {
+		$options = get_option( 'kkorsakov_htmx_options', [] );
+		return ! empty( $options['use_cdn'] );
+	}
+
+	/**
+	 * Получить опции конфигурации.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $config Текущая конфигурация.
+	 * @return array Обновленная конфигурация.
+	 */
+	public function get_option_config( array $config ): array {
+		$options = get_option( 'kkorsakov_htmx_options', [] );
+
+		if ( isset( $options['history_enabled'] ) ) {
+			$config['historyEnabled'] = ! empty( $options['history_enabled'] );
+		}
+
+		if ( ! empty( $options['swap_style'] ) ) {
+			$config['defaultSwapStyle'] = $options['swap_style'];
+		}
+
+		return $config;
 	}
 
 	/**

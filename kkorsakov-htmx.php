@@ -2,7 +2,7 @@
 /**
  * Plugin Name: kkorsakov-htmx
  * Plugin URI: https://github.com/korsakov-kuzjma/kkorsakov-htmx
- * Description: Seamless HTMX library integration for WordPress with extended REST API for fragment requests.
+ * Description: Бесшовная интеграция библиотеки HTMX в WordPress с расширенным REST API для фрагментных запросов.
  * Version: 1.0.0
  * Author: kkorsakov
  * Author URI: https://github.com/korsakov-kuzjma

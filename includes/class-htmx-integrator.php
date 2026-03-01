@@ -70,6 +70,20 @@ class Htmx_Integrator {
 		add_shortcode( 'htmx', [ $this, 'render_shortcode' ] );
 		add_filter( 'render_block', [ $this, 'check_block_for_htmx' ], 10, 2 );
 		add_action( 'template_redirect', [ $this, 'detect_htmx_usage' ] );
+
+		add_filter( 'kkorsakov_htmx_force_enqueue', [ $this, 'get_option_force_enqueue' ] );
+	}
+
+	/**
+	 * Получить опцию force_enqueue.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool Значение опции.
+	 */
+	public function get_option_force_enqueue(): bool {
+		$options = get_option( 'kkorsakov_htmx_options', [] );
+		return ! empty( $options['force_enqueue'] );
 	}
 
 	/**

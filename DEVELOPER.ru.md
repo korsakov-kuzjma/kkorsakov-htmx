@@ -40,8 +40,33 @@ Kkorsakov\Htmx\
 ├── Assets          - Управление JS/CSS активами
 ├── Htmx_Integrator - Интеграция HTMX (шорткоды, блоки)
 ├── Rest_Api        - REST API эндпоинты
+├── Admin_Settings  - Страницы настроек и документации в админке
 └── Traits\
     └── Singleton   - Трейт для паттерна Singleton
+```
+
+### Страницы админки
+
+Плагин предоставляет страницы в админке WordPress:
+
+- **Страница настроек**: HTMX → Настройки
+- **Страница документации**: HTMX → Документация
+
+### Хранение настроек
+
+Настройки сохраняются в таблице опций WordPress:
+
+```php
+// Получить настройки
+$options = get_option('kkorsakov_htmx_options', []);
+
+// Значения по умолчанию
+$defaults = [
+    'use_cdn'        => false,
+    'force_enqueue'  => false,
+    'history_enabled' => true,
+    'swap_style'      => 'innerHTML',
+];
 ```
 
 ### Основные константы
